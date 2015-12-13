@@ -3,67 +3,181 @@ var router = express.Router();
 var sign = require('../sign');
 var config = require('../config');
 var mongo = require('mongoskin');
-var APIGatewayHost = 'localhost'
-var APIGatewayPort = '3007'
+var APIGatewayHost = 'localhost';
+var APIGatewayPort = '3007';
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('../config/awsconfig.json');
 
-router.get('/courses', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//initialize AWS SQS
+var sqs = new AWS.SQS();
+var sqsSetParams = {
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    Attributes: {
+        'Policy': JSON.stringify({})
+    }
+};
+
+//set SQS attribute
+sqs.setQueueAttributes(sqsSetParams, function(err, data) {
+    if (err) console.log(err, err.stack);
+    // an error occurred
 });
 
-router.get('/courses/:id', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+var sqsSendParams = {
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    MessageAttributes: {
+        someKey: { DataType: 'String', StringValue: "string"}
+    }
+};
+
+var sendMessage = function (obj) {
+    sqsSendParams.MessageBody = JSON.stringify(obj);
+    //send message to SQS
+    console.log('send message');
+    sqs.sendMessage(sqsSendParams, function (err, data) {
+        if (err) console.log(err, err.stack);
+    });
+};
+
+router.post('/students', function (req, res, next) {
+    var obj = {
+        type: "students",
+        method: "post",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
-router.put('/courses/:id', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.get('/students/:sid', function (req, res, next) {
+    var obj = {
+        type: "students",
+        method: "get",
+        url: req.url
+    };
+    sendMessage(obj);
 });
 
-/*router.post('/findCourses', function(req, res, next) {
-    var server = config.find('courses', req.body.name[0]);
-    var serverlist = server.split(':');
-    sign.finds(req,res,serverlist[0],serverlist[1]);
-});*/
-
-router.post('/courses', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.put('/students/:sid', function (req, res, next) {
+    var obj = {
+        type: "students",
+        method: "put",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
-router.post('/courses/:cid/students/:sid', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.delete('/students/:sid', function (req, res, next) {
+    var obj = {
+        type: "students",
+        method: "delete",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
-router.delete('/courses/:id', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.post('/finance', function (req, res, next) {
+    var obj = {
+        type: "finance",
+        method: "post",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
-router.delete('/courses/:cid/students/:sid', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.get('/finance/:sid', function (req, res, next) {
+    var obj = {
+        type: "finance",
+        method: "get",
+        url: req.url
+    };
+    sendMessage(obj);
 });
 
-router.post('/servers', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.put('/finance/:sid', function (req, res, next) {
+    var obj = {
+        type: "finance",
+        method: "put",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
-router.get('/students', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+router.delete('/finance/:sid', function (req, res, next) {
+    var obj = {
+        type: "finance",
+        method: "delete",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
 });
 
 
-router.get('/students/:id', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
 
-router.post('/students', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
 
-router.put('/students/:id', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
-
-router.delete('/students/:id/', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
+//router.get('/courses', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.get('/courses/:id', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.put('/courses/:id', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+///*router.post('/findCourses', function(req, res, next) {
+//    var server = config.find('courses', req.body.name[0]);
+//    var serverlist = server.split(':');
+//    sign.finds(req,res,serverlist[0],serverlist[1]);
+//});*/
+//
+//router.post('/courses', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.post('/courses/:cid/students/:sid', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.delete('/courses/:id', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.delete('/courses/:cid/students/:sid', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.post('/servers', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.get('/students', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//
+//router.get('/students/:id', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.post('/students', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.put('/students/:id', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
+//
+//router.delete('/students/:id/', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
 
 /*router.post('/findStudents', function(req, res, next) {
     var server = config.find('students', req.body.name[0]);
@@ -71,9 +185,9 @@ router.delete('/students/:id/', function(req, res, next) {
     sign.finds(req,res,serverlist[0],serverlist[1]);
 });*/
 //DataModel change & Partition
-router.post('/students/models', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
+//router.post('/students/models', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
 
 /*router.delete('/students/models', function(req, res, next) {
     config.Partition();
@@ -84,9 +198,9 @@ router.post('/students/models', function(req, res, next) {
     }
     res.send(JSON.stringify({ RET:200,status:"success" }));
 });*/
-router.post('/courses/models', function(req, res, next) {
-    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
-});
+//router.post('/courses/models', function(req, res, next) {
+//    sign.finds(req, res, APIGatewayHost, APIGatewayPort);
+//});
 
 /*router.delete('/courses/models', function(req, res, next) {
     config.Partition();

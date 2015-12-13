@@ -9,6 +9,11 @@ var routes = require('./routes/index');
 var users = require('./routes/user'); // main router
 var app = express();
 var db = mongo.db("mongodb://localhost:27017/userData", {native_parser:true});
+var AWS = require('aws-sdk');
+AWS.config.loadFromPath('../config/awsconfig.json');
+var sqs = new AWS.SQS();
+
+
 /*var collectionName = 'serverlist';
 var obj = {
       "category": "students",
@@ -114,6 +119,42 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+
+
+var getMessageFromSQS = function () {
+    var sqsRecieveParams = {
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+        MaxNumberOfMessages: 10
+    };
+    //receive message from SQS
+    sqs.receiveMessage(sqsRecieveParams, function (err, data) {
+        if (data && data.Messages && data.Messages.length > 0) {
+            var len = data.Messages.length;
+            for (var i = 0; i < len; i++) {
+                console.log('receive message');
+                var message = data.Messages[i];
+                console.log(message);
+                deleteMessageFromSQS(message);
+            }
+        }
+    });
+};
+
+
+setInterval(getMessageFromSQS, 10);
+
+//delete message from SQS
+var deleteMessageFromSQS = function (message) {
+    var sqsDeleteParams = {
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+        ReceiptHandle: message.ReceiptHandle
+    };
+    sqs.deleteMessage(sqsDeleteParams, function (err, data) {
+        if (err) console.log(err);
+    });
+};
+
 
 
 module.exports = app;

@@ -9,6 +9,8 @@ var routes = require('./routes/index');
 var users = require('./routes/user'); // main router
 var app = express();
 var db = mongo.db("mongodb://localhost:27017/userData", {native_parser:true});
+
+
 /*var collectionName = 'serverlist';
 var obj = {
       "category": "students",
@@ -75,7 +77,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 //import database
 app.use(function(req,res,next){
     req.db = db;
-    console.log("here");
     next();
 });
 
@@ -114,6 +115,8 @@ app.use(function(err, req, res, next) {
     error: {}
   });
 });
+
+
 
 
 module.exports = app;
