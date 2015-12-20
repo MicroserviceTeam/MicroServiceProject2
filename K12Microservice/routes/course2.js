@@ -32,8 +32,8 @@ function getDateTime() {
 //Add a new course
 router.post('/students', function (req, res, next) {
     var studentID = req.body.studentID;
-    var name = req.body.name;
-    if (studentID == null || name == null) {
+    var studentName = req.body.studentName;
+    if (studentID == null || studentName == null) {
         res.send(JSON.stringify({ RET:402,status:"wrong JSON format" }));
     }
     var elementary_school = req.body.elementary_school;
@@ -52,20 +52,20 @@ router.post('/students', function (req, res, next) {
         TableName:table,
         Item:{
             "studentID": studentID,
-            "name": name,
-            "elementary school": elementary_school,
-            "elementary school enrolling date": elementary_school_enrolling_date,
-            "elementary school graduate date": elementary_school_graduate_date,
-            "middle school": middle_school,
-            "middle school enrolling date": middle_school_enrolling_date,
-            "middle school graduate date": middle_school_graduate_date,
-            "high school": high_school,
-            "high school enrolling date": high_school_enrolling_date,
-            "high school graduate date": high_school_graduate_date,
+            "studentName": studentName,
+            "elementary_school": elementary_school,
+            "elementary_school_enrolling_date": elementary_school_enrolling_date,
+            "elementary_school_graduate_date": elementary_school_graduate_date,
+            "middle_school": middle_school,
+            "middle_school_enrolling_date": middle_school_enrolling_date,
+            "middle_school_graduate_date": middle_school_graduate_date,
+            "high_school": high_school,
+            "high_school_enrolling_date": high_school_enrolling_date,
+            "high_school_graduate_date": high_school_graduate_date,
             "college": college,
-            "college enrolling date": college_enrolling_date,
-            "college graduate date": college_graduate_date,
-            "last modified time": getDateTime()
+            "college_enrolling_date": college_enrolling_date,
+            "college_graduate_date": college_graduate_date,
+            "last_modified_time": getDateTime()
         },
         ConditionExpression: "#id <> :stuID",
         ExpressionAttributeNames:{"#id":"studentID"},
@@ -88,19 +88,15 @@ router.post('/students', function (req, res, next) {
     });
 });
 
-//modify a course's information
-router.put('/students/:sid', function (req, res, next) {
-    var id = req.params.sid;
-    var body = req.body;
-    body["lastModifiedTime"] = getDateTime();
+function updateAttr(path, id, value, res){
     var params = {
         TableName:table,
         Key:{
             "studentID": id
         },
-        UpdateExpression: "set body = :r",
-         ExpressionAttributeValues:{
-           ":r":body
+        UpdateExpression: path,
+        ExpressionAttributeValues:{
+            ":r":value
         },
         ReturnValues:"UPDATED_NEW"
     };
@@ -111,10 +107,55 @@ router.put('/students/:sid', function (req, res, next) {
             res.send(JSON.stringify({RET: 500, status: "internal error"}));
         } else {
             console.log("UpdateItem succeeded:", JSON.stringify(data, null, 2));
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 200, status: "success"}));
+            
         }
     });
+}
+//modify a course's information
+router.put('/students/:sid', function (req, res, next) {
+    var id = req.params.sid;
+    if(req.body.studentName!=null){
+        updateAttr("set studentName = :r", id, req.body.studentName, res);
+    }
+    if(req.body.elementary_school!=null){
+        updateAttr("set elementary_school = :r", id, req.body.elementary_school, res);
+    }
+    if(req.body.elementary_school_enrolling_date!=null){
+        updateAttr("set elementary_school_enrolling_date = :r", id, req.body.elementary_school_enrolling_date, res);
+    }
+    if(req.body.elementary_school_graduate_date!=null){
+        updateAttr("set elementary_school_graduate_date = :r", id, req.body.elementary_school_graduate_date, res);
+    }
+    if(req.body.middle_school!=null){
+        updateAttr("set middle_school = :r", id, req.body.middle_school, res);
+    }
+    if(req.body.middle_school_enrolling_date!=null){
+        updateAttr("set middle_school_enrolling_date = :r", id, req.body.middle_school_enrolling_date, res);
+    }
+    if(req.body.middle_school_graduate_date!=null){
+        updateAttr("set middle_school_graduate_date = :r", id, req.body.middle_school_graduate_date, res);
+    }
+    if(req.body.high_school!=null){
+        updateAttr("set high_school = :r", id, req.body.high_school, res);
+    }
+    if(req.body.high_school_enrolling_date!=null){
+        updateAttr("set high_school_enrolling_date = :r", id, req.body.high_school_enrolling_date, res);
+    }
+    if(req.body.high_school_graduate_date!=null){
+        updateAttr("set high_school_graduate_date = :r", id, req.body.high_school_graduate_date, res);
+    }
+    if(req.body.college!=null){
+        updateAttr("set college = :r", id, req.body.college, res);
+    }
+    if(req.body.college_enrolling_date!=null){
+        updateAttr("set college_enrolling_date = :r", id, req.body.college_enrolling_date, res);
+    }
+    if(req.body.college_graduate_date!=null){
+        updateAttr("set college_graduate_date = :r", id, req.body.college_graduate_date, res);
+    }
+    updateAttr("set last_modified_time = :r", id, getDateTime(), res);
+    res.contentType('json');
+    res.send(JSON.stringify({RET: 200, status: "success"}));
 });
 
 
