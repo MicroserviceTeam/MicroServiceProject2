@@ -122,10 +122,21 @@ app.use(function(err, req, res, next) {
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+//receieve messages
 var getMessageFromSQS = function () {
     var sqsRecieveParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
-        MaxNumberOfMessages: 10
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice"
     };
     //receive message from SQS
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
@@ -141,7 +152,6 @@ var getMessageFromSQS = function () {
     });
 };
 
-
 setInterval(getMessageFromSQS, 10);
 
 //delete message from SQS
@@ -154,6 +164,33 @@ var deleteMessageFromSQS = function (message) {
         if (err) console.log(err);
     });
 };
+
+
+
+
+//send Messages
+var sqsSendParams = {
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    MessageAttributes: {
+        someKey: { DataType: 'String', StringValue: "string"}
+    }
+};
+
+var sendMessage = function (obj) {
+    sqsSendParams.MessageBody = JSON.stringify(obj);
+    //send message to SQS
+    console.log('send message');
+    sqs.sendMessage(sqsSendParams, function (err, data) {
+        if (err) console.log(err, err.stack);
+    });
+};
+
+
+
+
+
+
+
 
 
 
