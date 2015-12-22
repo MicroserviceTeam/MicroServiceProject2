@@ -12,11 +12,21 @@ AWS.config.loadFromPath('../config/awsconfig.json');
 
 //initialize AWS SQS
 var sqs = new AWS.SQS();
+AWS.config.loadFromPath('./config/awsconfig.json');
+
+//initialize AWS SQS
+var sqs = new AWS.SQS();
+var sqsSetParams = {
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
+    Attributes: {
+        'Policy': JSON.stringify({})
+    }
+};
 
 
 //send messages
 var sqsSendParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
     MessageAttributes: {
         someKey: { DataType: 'String', StringValue: "string"}
     }
