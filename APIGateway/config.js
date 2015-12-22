@@ -2,7 +2,6 @@ var fs=require('fs');
 var sign = require('./sign');
 
 var configFile = './config.json';
-var configinUse = './routes/config.json';
 exports.find = function(category,name) {
     //name = name.toUpperCase();
     data = fs.readFileSync(configinUse);
@@ -17,17 +16,16 @@ exports.find = function(category,name) {
 };
 
 exports.getServerList = function(category) {
-    data = fs.readFileSync(configinUse);
+    data = fs.readFileSync(configFile);
     console.log(data);
     var jsonObj=JSON.parse(data);
-    var list = new Array();
     for(var i=0,size=jsonObj.length;i<size;i++){
         var record=jsonObj[i];
         if (category == record['category'] ) {
-            list.push(record['server'])
+            return record['server'];
         }
     }
-    return list;
+    return "Not found";
 };
 
 exports.getoriStart = function(category) {
