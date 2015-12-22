@@ -8,9 +8,10 @@ var APIGatewayPort = '3007';
 var AWS = require('aws-sdk');
 var uuid = require('node-uuid');
 
-//initialize AWS SQS
-var sqs = new AWS.SQS();
+//initialize AWS SQ
 AWS.config.loadFromPath('./config/awsconfig.json');
+
+var sqs = new AWS.SQS();
 
 var sqsSetParams = {
     QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
