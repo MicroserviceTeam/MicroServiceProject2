@@ -4,12 +4,12 @@ var favicon = require('serve-favicon');
 var logger = require('morgan');
 var cookieParser = require('cookie-parser');
 var bodyParser = require('body-parser');
-var mongo = require('mongoskin');
 var routes = require('./routes/index');
 var users = require('./routes/user'); // main router
 var app = express();
-var db = mongo.db("mongodb://localhost:27017/userData", {native_parser:true});
 var AWS = require('aws-sdk');
+var sign = require('./sign');
+var config = require('./config');
 AWS.config.loadFromPath('./config/awsconfig.json');
 var sqs = new AWS.SQS();
 
@@ -134,7 +134,14 @@ var getMessageFromSQS = function () {
                 console.log('receive message');
                 var message = data.Messages[i];
                 console.log(message);
+                var obj = JSON.parse(message.Body);
                 deleteMessageFromSQS(message);
+                var servers = config.getServerList(obj.type);
+                var serverlist = servers.split(':');
+                sign.findSpecific(serverlist[0],serverlist[1], obj.method, obj.url, obj.body, obj.id, function(data){
+                    console.log(data);
+                });
+                
             }
         }
     });
@@ -145,6 +152,7 @@ setInterval(getMessageFromSQS, 10);
 
 //delete message from SQS
 var deleteMessageFromSQS = function (message) {
+    console.log("message");
     var sqsDeleteParams = {
         QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
         ReceiptHandle: message.ReceiptHandle
