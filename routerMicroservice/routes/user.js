@@ -6,12 +6,12 @@ var mongo = require('mongoskin');
 var APIGatewayHost = 'localhost';
 var APIGatewayPort = '3007';
 var AWS = require('aws-sdk');
-AWS.config.loadFromPath('../config/awsconfig.json');
+AWS.config.loadFromPath('./config/awsconfig.json');
 
 //initialize AWS SQS
 var sqs = new AWS.SQS();
 var sqsSetParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
     Attributes: {
         'Policy': JSON.stringify({})
     }
@@ -24,7 +24,7 @@ sqs.setQueueAttributes(sqsSetParams, function(err, data) {
 });
 
 var sqsSendParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
     MessageAttributes: {
         someKey: { DataType: 'String', StringValue: "string"}
     }
@@ -47,6 +47,9 @@ router.post('/students', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
+    
+    res.contentType('json');
+    res.send(JSON.stringify({RET: 500, status: "internal error"}));
 });
 
 router.get('/students/:sid', function (req, res, next) {

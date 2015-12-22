@@ -10,7 +10,7 @@ var users = require('./routes/user'); // main router
 var app = express();
 var db = mongo.db("mongodb://localhost:27017/userData", {native_parser:true});
 var AWS = require('aws-sdk');
-AWS.config.loadFromPath('../config/awsconfig.json');
+AWS.config.loadFromPath('./config/awsconfig.json');
 var sqs = new AWS.SQS();
 
 
@@ -124,8 +124,7 @@ app.use(function(err, req, res, next) {
 
 var getMessageFromSQS = function () {
     var sqsRecieveParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
-        MaxNumberOfMessages: 10
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
     };
     //receive message from SQS
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
@@ -147,7 +146,7 @@ setInterval(getMessageFromSQS, 10);
 //delete message from SQS
 var deleteMessageFromSQS = function (message) {
     var sqsDeleteParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
         ReceiptHandle: message.ReceiptHandle
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
