@@ -8,14 +8,10 @@ var APIGatewayPort = '3007';
 var AWS = require('aws-sdk');
 var uuid = require('node-uuid');
 
-AWS.config.loadFromPath('../config/awsconfig.json');
-
 //initialize AWS SQS
 var sqs = new AWS.SQS();
 AWS.config.loadFromPath('./config/awsconfig.json');
 
-//initialize AWS SQS
-var sqs = new AWS.SQS();
 var sqsSetParams = {
     QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
     Attributes: {
@@ -37,7 +33,10 @@ var sendMessage = function (obj) {
     //send message to SQS
     console.log('send message');
     sqs.sendMessage(sqsSendParams, function (err, data) {
-        if (err) console.log(err, err.stack);
+        if (err) {
+            console.log("sdad");
+            console.log(err, err.stack);
+        }
     });
 };
 
@@ -46,7 +45,7 @@ var sendMessage = function (obj) {
 //receive messages
 var getMessageFromSQS = function (res, id) {
     var sqsRecieveParams = {
-        QueueUrl: ""
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2"
     };
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
         if (data && data.Messages && data.Messages.length > 0) {
@@ -54,7 +53,7 @@ var getMessageFromSQS = function (res, id) {
             for (var i = 0; i < len; i++) {
                 console.log('receive message');
                 var message = data.Messages[i];
-                if  (JSON.parse(message).Body.id == id)
+                if  (JSON.parse(message).id == id)
                     res.send(message);
                 deleteMessageFromSQS(message);
             }
@@ -65,7 +64,7 @@ var getMessageFromSQS = function (res, id) {
 //delete message from SQS
 var deleteMessageFromSQS = function (message) {
     var sqsDeleteParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice2",
         ReceiptHandle: message.ReceiptHandle
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
@@ -95,6 +94,7 @@ router.get('/students/:sid', function (req, res, next) {
         method: "get",
         url: req.url
     };
+    console.log(obj);
     sendMessage(obj);
     setInterval(getMessageFromSQS(res, id), 10);
 });

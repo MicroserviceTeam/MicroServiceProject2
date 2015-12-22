@@ -136,7 +136,7 @@ app.use(function(err, req, res, next) {
 //receieve messages
 var getMessageFromSQS = function () {
     var sqsRecieveParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice"
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice"
     };
     //receive message from SQS
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
@@ -152,6 +152,7 @@ var getMessageFromSQS = function () {
                 var serverlist = servers.split(':');
                 sign.findSpecific(serverlist[0],serverlist[1], obj.method, obj.url, obj.body, obj.id, function(data){
                     console.log(data);
+                    sendMessage(data);
                 });
                 
             }
@@ -178,7 +179,7 @@ var deleteMessageFromSQS = function (message) {
 
 //send Messages
 var sqsSendParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2",
     MessageAttributes: {
         someKey: { DataType: 'String', StringValue: "string"}
     }
