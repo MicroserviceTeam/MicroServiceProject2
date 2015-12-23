@@ -125,14 +125,6 @@ app.use(function(err, req, res, next) {
 
 
 
-
-
-
-
-
-
-
-
 //receieve messages
 var getMessageFromSQS = function () {
     var sqsRecieveParams = {
@@ -150,7 +142,6 @@ var getMessageFromSQS = function () {
                 var servers = config.getServerList(obj.type);
                 var serverlist = servers.split(':');
                 sign.findSpecific(serverlist[0],serverlist[1], obj.method, obj.url, obj.body, obj.id, function(data){
-                    console.log("111111111111");
                     sendMessage(data);
                 });
                 
@@ -188,6 +179,8 @@ var sendMessage = function (obj) {
     sqsSendParams.MessageBody = JSON.stringify(obj);
     //send message to SQS
     console.log('send message');
+    console.log("aaaaaaaaa");
+    console.log(obj);
     sqs.sendMessage(sqsSendParams, function (err, data) {
         if (err) console.log(err, err.stack);
     });

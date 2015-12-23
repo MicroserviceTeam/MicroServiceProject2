@@ -37,7 +37,7 @@ var sendMessage = function (obj) {
 
 
 //receive messages
-var getMessageFromSQS = function (res, id) {
+var getMessageFromSQS = function (res, id, intervalID) {
     var sqsRecieveParams = {
         QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2"
     };
@@ -47,10 +47,19 @@ var getMessageFromSQS = function (res, id) {
             for (var i = 0; i < len; i++) {
                 console.log('receive message');
                 var message = data.Messages[i];
-                console.log('aaaaaaaaa');
-                console.log(JSON.parse(message.Body).id);
-                if  (JSON.parse(message.Body).id == id) {
-                    console.log('d');
+                console.log("2222222222");
+                console.log(message.Body);
+                console.log(id);
+                var reqID;
+                var dataObj = JSON.parse(message.Body);
+                if (dataObj.length == 1)
+                    reqID=dataObj.id;
+                else
+                    reqID = dataObj[0].id;
+                console.log(reqID);
+                if  (reqID == id) {
+                    clearInterval(intervalID);
+                    console.log('444444');
                     res.send(message.Body);
                     deleteMessageFromSQS(message);
                 }
@@ -67,6 +76,7 @@ var deleteMessageFromSQS = function (message) {
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
         if (err) {
+            console.log("3333333333");
             console.log(err);
         }
     });
@@ -81,11 +91,10 @@ router.post('/students', function (req, res, next) {
         url: req.url,
         body: req.body
     };
-    sendMessage(obj);
-    console.log("asdsadasdad");
+    console.log("11111111");
     console.log(obj.id);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
-    //getMessageFromSQS(res, obj.id);
+    sendMessage(obj);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.get('/students/:sid', function (req, res, next) {
@@ -96,8 +105,22 @@ router.get('/students/:sid', function (req, res, next) {
         url: req.url
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
+
+
+router.get('/students', function (req, res, next) {
+    var obj = {
+        id: uuid.v1(),
+        type: "students",
+        method: "get",
+        url: req.url
+    };
+    sendMessage(obj);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
+});
+
+
 
 router.put('/students/:sid', function (req, res, next) {
     var obj = {
@@ -108,7 +131,7 @@ router.put('/students/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.delete('/students/:sid', function (req, res, next) {
@@ -120,7 +143,7 @@ router.delete('/students/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.post('/finance', function (req, res, next) {
@@ -132,7 +155,7 @@ router.post('/finance', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.get('/finance/:sid', function (req, res, next) {
@@ -143,7 +166,7 @@ router.get('/finance/:sid', function (req, res, next) {
         url: req.url
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.put('/finance/:sid', function (req, res, next) {
@@ -155,7 +178,7 @@ router.put('/finance/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 router.delete('/finance/:sid', function (req, res, next) {
@@ -167,7 +190,7 @@ router.delete('/finance/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
 
 module.exports = router;
