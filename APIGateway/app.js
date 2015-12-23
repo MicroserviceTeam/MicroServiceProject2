@@ -145,13 +145,12 @@ var getMessageFromSQS = function () {
             for (var i = 0; i < len; i++) {
                 console.log('receive message');
                 var message = data.Messages[i];
-                console.log(message);
                 var obj = JSON.parse(message.Body);
                 deleteMessageFromSQS(message);
                 var servers = config.getServerList(obj.type);
                 var serverlist = servers.split(':');
                 sign.findSpecific(serverlist[0],serverlist[1], obj.method, obj.url, obj.body, obj.id, function(data){
-                    console.log(data);
+                    console.log("111111111111");
                     sendMessage(data);
                 });
                 

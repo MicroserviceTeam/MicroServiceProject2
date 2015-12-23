@@ -13,12 +13,6 @@ AWS.config.loadFromPath('./config/awsconfig.json');
 
 var sqs = new AWS.SQS();
 
-var sqsSetParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
-    Attributes: {
-        'Policy': JSON.stringify({})
-    }
-};
 
 
 //send messages
@@ -35,7 +29,6 @@ var sendMessage = function (obj) {
     console.log('send message');
     sqs.sendMessage(sqsSendParams, function (err, data) {
         if (err) {
-            console.log("sdad");
             console.log(err, err.stack);
         }
     });
@@ -54,9 +47,13 @@ var getMessageFromSQS = function (res, id) {
             for (var i = 0; i < len; i++) {
                 console.log('receive message');
                 var message = data.Messages[i];
-                if  (JSON.parse(message).id == id)
-                    res.send(message);
-                deleteMessageFromSQS(message);
+                console.log('aaaaaaaaa');
+                console.log(JSON.parse(message.Body).id);
+                if  (JSON.parse(message.Body).id == id) {
+                    console.log('d');
+                    res.send(message.Body);
+                    deleteMessageFromSQS(message);
+                }
             }
         }
     });
@@ -65,15 +62,15 @@ var getMessageFromSQS = function (res, id) {
 //delete message from SQS
 var deleteMessageFromSQS = function (message) {
     var sqsDeleteParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice2",
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2",
         ReceiptHandle: message.ReceiptHandle
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
-        if (err) console.log(err);
+        if (err) {
+            console.log(err);
+        }
     });
 };
-
-
 
 
 router.post('/students', function (req, res, next) {
@@ -85,7 +82,10 @@ router.post('/students', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    console.log("asdsadasdad");
+    console.log(obj.id);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
+    //getMessageFromSQS(res, obj.id);
 });
 
 router.get('/students/:sid', function (req, res, next) {
@@ -95,9 +95,8 @@ router.get('/students/:sid', function (req, res, next) {
         method: "get",
         url: req.url
     };
-    console.log(obj);
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.put('/students/:sid', function (req, res, next) {
@@ -109,7 +108,7 @@ router.put('/students/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.delete('/students/:sid', function (req, res, next) {
@@ -121,7 +120,7 @@ router.delete('/students/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.post('/finance', function (req, res, next) {
@@ -133,7 +132,7 @@ router.post('/finance', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.get('/finance/:sid', function (req, res, next) {
@@ -144,7 +143,7 @@ router.get('/finance/:sid', function (req, res, next) {
         url: req.url
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.put('/finance/:sid', function (req, res, next) {
@@ -156,7 +155,7 @@ router.put('/finance/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 router.delete('/finance/:sid', function (req, res, next) {
@@ -168,7 +167,7 @@ router.delete('/finance/:sid', function (req, res, next) {
         body: req.body
     };
     sendMessage(obj);
-    setInterval(getMessageFromSQS(res, id), 10);
+    setInterval(function() {getMessageFromSQS(res, obj.id);}, 10);
 });
 
 module.exports = router;
