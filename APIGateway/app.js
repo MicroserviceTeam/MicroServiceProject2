@@ -179,7 +179,6 @@ var sendMessage = function (obj) {
     sqsSendParams.MessageBody = JSON.stringify(obj);
     //send message to SQS
     console.log('send message');
-    console.log("aaaaaaaaa");
     console.log(obj);
     sqs.sendMessage(sqsSendParams, function (err, data) {
         if (err) console.log(err, err.stack);

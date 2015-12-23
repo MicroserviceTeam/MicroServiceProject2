@@ -1,8 +1,5 @@
 var express = require('express');
 var router = express.Router();
-var sign = require('../sign');
-var config = require('../config');
-var mongo = require('mongoskin');
 var APIGatewayHost = 'localhost';
 var APIGatewayPort = '3007';
 var AWS = require('aws-sdk');
@@ -47,20 +44,11 @@ var getMessageFromSQS = function (res, id, intervalID) {
             for (var i = 0; i < len; i++) {
                 console.log('receive message');
                 var message = data.Messages[i];
-                console.log("2222222222");
-                console.log(message.Body);
-                console.log(id);
-                var reqID;
-                var dataObj = JSON.parse(message.Body);
-                if (dataObj.length == 1)
-                    reqID=dataObj.id;
-                else
-                    reqID = dataObj[0].id;
-                console.log(reqID);
-                if  (reqID == id) {
+                if  (JSON.parse(message.Body)[JSON.parse(message.Body).length - 1] == id) {
                     clearInterval(intervalID);
-                    console.log('444444');
-                    res.send(message.Body);
+                    var result = JSON.parse(message.Body);
+                    result.pop();
+                    res.send(result);
                     deleteMessageFromSQS(message);
                 }
             }
@@ -76,7 +64,6 @@ var deleteMessageFromSQS = function (message) {
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
         if (err) {
-            console.log("3333333333");
             console.log(err);
         }
     });
@@ -138,53 +125,6 @@ router.delete('/students/:sid', function (req, res, next) {
     var obj = {
         id: uuid.v1(),
         type: "students",
-        method: "delete",
-        url: req.url,
-        body: req.body
-    };
-    sendMessage(obj);
-    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
-});
-
-router.post('/finance', function (req, res, next) {
-    var obj = {
-        id: uuid.v1(),
-        type: "finance",
-        method: "post",
-        url: req.url,
-        body: req.body
-    };
-    sendMessage(obj);
-    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
-});
-
-router.get('/finance/:sid', function (req, res, next) {
-    var obj = {
-        id: uuid.v1(),
-        type: "finance",
-        method: "get",
-        url: req.url
-    };
-    sendMessage(obj);
-    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
-});
-
-router.put('/finance/:sid', function (req, res, next) {
-    var obj = {
-        id: uuid.v1(),
-        type: "finance",
-        method: "put",
-        url: req.url,
-        body: req.body
-    };
-    sendMessage(obj);
-    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
-});
-
-router.delete('/finance/:sid', function (req, res, next) {
-    var obj = {
-        id: uuid.v1(),
-        type: "finance",
         method: "delete",
         url: req.url,
         body: req.body
