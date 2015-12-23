@@ -124,8 +124,10 @@ exports.findSpecific = function(thost,tport,tmethod, tpath, bodyObj, idObj, succ
 
             console.log('content ' + wholeData);
             var dataObj = JSON.parse(wholeData);
-            dataObj.id=idObj;
-
+            if (dataObj.length == 1)
+                dataObj.id=idObj;
+            else
+                dataObj[0].id = idObj;
             success(dataObj);
         });
     }).on('error', function(err) {
