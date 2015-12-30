@@ -221,31 +221,33 @@ router.delete('/students/:sid', function (req, res, next) {
     if(req.params.sid=='attributes'){
         var params = {
             TableName : table,
-            KeyConditionExpression: "studentID <> :validID",
+            FilterExpression : 'studentID <> :validID',
             ExpressionAttributeValues: {
                 ":validID":'S'
             }
         };
 
-        dynamodbDoc.query(params, function(err, data) {
+        dynamodbDoc.scan(params, function(err, data) {
             if (err) {
                 console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 500, status: "internal error"}));
             } else {
                 console.log("Query succeeded.");
                 data.Items.forEach(function(item) {
                     var param = {
                         TableName : table,
-                        Key:{
+                        Key : {
                             "studentID": item.studentID
                         },
-                        UpdateExpression: "delete :val1",
-                        ExpressionAttributeValues:{
-                            ":val1":req.body.attributeName
+                        UpdateExpression : "DELETE #attrName ",
+                        ExpressionAttributeNames : {
+                            "#attrName" : req.body.attributeName
                         },
-                        ReturnValues:"UPDATED_NEW"
+                        ReturnValues : "UPDATED_NEW"
                     };
                     console.log("Updating the item...");
-                    dynamodbDoc.update(params, function(err, data) {
+                    dynamodbDoc.update(param, function(err, data) {
                         if (err) {
                             console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
                         } else {
@@ -253,6 +255,8 @@ router.delete('/students/:sid', function (req, res, next) {
                         }
                     });
                 });
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 200, status: "success"}));
             }
         });
     }else{
@@ -280,32 +284,33 @@ router.delete('/students/:sid', function (req, res, next) {
 router.post('/students/attributes', function (req, res, next) {
     var params = {
         TableName : table,
-        KeyConditionExpression: "studentID <> :validID",
+        FilterExpression : 'studentID <> :validID',
         ExpressionAttributeValues: {
             ":validID":'S'
         }
     };
 
-    dynamodbDoc.query(params, function(err, data) {
+    dynamodbDoc.scan(params, function(err, data) {
         if (err) {
             console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+            res.contentType('json');
+            res.send(JSON.stringify({RET: 500, status: "internal error"}));
         } else {
             console.log("Query succeeded.");
             data.Items.forEach(function(item) {
                 var param = {
                     TableName : table,
-                    Key:{
+                    Key : {
                         "studentID": item.studentID
                     },
-                    UpdateExpression: "set :val1 = :val2",
-                    ExpressionAttributeValues:{
-                        ":val1":req.body.attributeName,
+                    UpdateExpression : "set "+req.body.attributeName+" = :val2",
+                    ExpressionAttributeValues : {
                         ":val2":req.body.attributeValue
                     },
-                    ReturnValues:"UPDATED_NEW"
+                    ReturnValues : "UPDATED_NEW"
                 };
                 console.log("Updating the item...");
-                dynamodbDoc.update(params, function(err, data) {
+                dynamodbDoc.update(param, function(err, data) {
                     if (err) {
                         console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
                     } else {
@@ -314,6 +319,8 @@ router.post('/students/attributes', function (req, res, next) {
                 });
             });
         }
+        res.contentType('json');
+        res.send(JSON.stringify({RET: 200, status: "success"}));
     });
 });
 
