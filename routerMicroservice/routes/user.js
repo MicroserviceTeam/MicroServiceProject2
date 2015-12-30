@@ -14,7 +14,7 @@ var sqs = new AWS.SQS();
 
 //send messages
 var sqsSendParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
     MessageAttributes: {
         someKey: { DataType: 'String', StringValue: "string"}
     }
@@ -36,7 +36,7 @@ var sendMessage = function (obj) {
 //receive messages
 var getMessageFromSQS = function (res, id, intervalID) {
     var sqsRecieveParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2"
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice2"
     };
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
         if (data && data.Messages && data.Messages.length > 0) {
@@ -59,7 +59,7 @@ var getMessageFromSQS = function (res, id, intervalID) {
 //delete message from SQS
 var deleteMessageFromSQS = function (message) {
     var sqsDeleteParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2",
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice2",
         ReceiptHandle: message.ReceiptHandle
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
@@ -78,8 +78,6 @@ router.post('/students', function (req, res, next) {
         url: req.url,
         body: req.body
     };
-    console.log("11111111");
-    console.log(obj.id);
     sendMessage(obj);
     var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
@@ -129,9 +127,26 @@ router.delete('/students/:sid', function (req, res, next) {
         url: req.url,
         body: req.body
     };
+    if (req.params.sid == 'attributes')
+        obj.type = 'attributes';
+
     sendMessage(obj);
     var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
 });
+
+router.post('/students/attributes', function (req, res, next) {
+    var obj = {
+        id: uuid.v1(),
+        type: 'attributes',
+        method: "post",
+        url: req.url,
+        body: req.body
+    };
+    sendMessage(obj);
+    var ID = setInterval(function() {getMessageFromSQS(res, obj.id, ID);}, 10);
+});
+
+
 
 module.exports = router;
 

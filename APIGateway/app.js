@@ -13,56 +13,6 @@ var config = require('./config');
 AWS.config.loadFromPath('./config/awsconfig.json');
 var sqs = new AWS.SQS();
 
-
-/*var collectionName = 'serverlist';
-var obj = {
-      "category": "students",
-      "server": "localhost",
-      "port": 3004,
-      "start": "A",
-      "end": "H"
-    };
-var obj2 = {
-      "category": "students",
-      "server": "localhost",
-      "port": 3005,
-      "start": "I",
-      "end": "P"
-    };
-var obj3 = {
-      "category": "students",
-      "server": "localhost",
-      "port": 3006,
-      "start": "Q",
-      "end": "Z"
-    };
-var obj4 = {
-      "category": "courses",
-      "server": "localhost",
-      "port": 3001,
-      "start": "A",
-      "end": "H"
-    };
-var obj5 = {
-      "category": "courses",
-      "server": "localhost",
-      "port": 3002,
-      "start": "I",
-      "end": "P"
-    };
-var obj6 = {
-      "category": "courses",
-      "server": "localhost",
-      "port": 3003,
-      "start": "Q",
-      "end": "Z"
-    };
-db.collection(collectionName).insert(obj, function (err, result) {})
-db.collection(collectionName).insert(obj2, function (err, result) {})
-db.collection(collectionName).insert(obj3, function (err, result) {})
-db.collection(collectionName).insert(obj4, function (err, result) {})
-db.collection(collectionName).insert(obj5, function (err, result) {})
-db.collection(collectionName).insert(obj6, function (err, result) {})*/
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'jade');
@@ -128,7 +78,7 @@ app.use(function(err, req, res, next) {
 //receieve messages
 var getMessageFromSQS = function () {
     var sqsRecieveParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice"
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice"
     };
     //receive message from SQS
     sqs.receiveMessage(sqsRecieveParams, function (err, data) {
@@ -156,7 +106,7 @@ setInterval(getMessageFromSQS, 10);
 var deleteMessageFromSQS = function (message) {
     console.log("message");
     var sqsDeleteParams = {
-        QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice",
+        QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice",
         ReceiptHandle: message.ReceiptHandle
     };
     sqs.deleteMessage(sqsDeleteParams, function (err, data) {
@@ -169,7 +119,7 @@ var deleteMessageFromSQS = function (message) {
 
 //send Messages
 var sqsSendParams = {
-    QueueUrl: "https://sqs.us-east-1.amazonaws.com/315360975270/microservice2",
+    QueueUrl: "https://sqs.us-east-1.amazonaws.com/880415752810/microservice2",
     MessageAttributes: {
         someKey: { DataType: 'String', StringValue: "string"}
     }
