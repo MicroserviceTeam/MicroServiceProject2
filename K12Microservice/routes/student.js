@@ -218,21 +218,101 @@ router.get('/students', function(req, res, next) {
 
 //delete a course
 router.delete('/students/:sid', function (req, res, next) {
+    if(req.params.sid=='attributes'){
+        var params = {
+            TableName : table,
+            KeyConditionExpression: "studentID <> :validID",
+            ExpressionAttributeValues: {
+                ":validID":'S'
+            }
+        };
+
+        dynamodbDoc.query(params, function(err, data) {
+            if (err) {
+                console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
+            } else {
+                console.log("Query succeeded.");
+                data.Items.forEach(function(item) {
+                    var param = {
+                        TableName : table,
+                        Key:{
+                            "studentID": item.studentID
+                        },
+                        UpdateExpression: "delete :val1",
+                        ExpressionAttributeValues:{
+                            ":val1":req.body.attributeName
+                        },
+                        ReturnValues:"UPDATED_NEW"
+                    };
+                    console.log("Updating the item...");
+                    dynamodbDoc.update(params, function(err, data) {
+                        if (err) {
+                            console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+                        } else {
+                            console.log("UpdateItem succeeded:", JSON.stringify(data, null, 2));
+                        }
+                    });
+                });
+            }
+        });
+    }else{
+        var params = {
+            TableName : table,
+            Key:{
+                "studentID":req.params.sid
+            }
+        };
+        dynamodbDoc.delete(params, function(err, data) {
+            if (err) {
+                console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 500, status: "internal error"}));
+            } else {
+                console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
+                res.contentType('json');
+                res.send(JSON.stringify({RET: 200, status: "success"}));
+            }
+        });
+    }
+    
+});
+
+router.post('/students/attributes', function (req, res, next) {
     var params = {
         TableName : table,
-        Key:{
-            "studentID":req.params.sid
+        KeyConditionExpression: "studentID <> :validID",
+        ExpressionAttributeValues: {
+            ":validID":'S'
         }
     };
-    dynamodbDoc.delete(params, function(err, data) {
+
+    dynamodbDoc.query(params, function(err, data) {
         if (err) {
-            console.error("Unable to delete item. Error JSON:", JSON.stringify(err, null, 2));
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 500, status: "internal error"}));
+            console.error("Unable to query. Error:", JSON.stringify(err, null, 2));
         } else {
-            console.log("DeleteItem succeeded:", JSON.stringify(data, null, 2));
-            res.contentType('json');
-            res.send(JSON.stringify({RET: 200, status: "success"}));
+            console.log("Query succeeded.");
+            data.Items.forEach(function(item) {
+                var param = {
+                    TableName : table,
+                    Key:{
+                        "studentID": item.studentID
+                    },
+                    UpdateExpression: "set :val1 = :val2",
+                    ExpressionAttributeValues:{
+                        ":val1":req.body.attributeName,
+                        ":val2":req.body.attributeValue
+                    },
+                    ReturnValues:"UPDATED_NEW"
+                };
+                console.log("Updating the item...");
+                dynamodbDoc.update(params, function(err, data) {
+                    if (err) {
+                        console.error("Unable to update item. Error JSON:", JSON.stringify(err, null, 2));
+                    } else {
+                        console.log("UpdateItem succeeded:", JSON.stringify(data, null, 2));
+                    }
+                });
+            });
         }
     });
 });
